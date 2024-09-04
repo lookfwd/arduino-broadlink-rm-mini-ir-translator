@@ -236,6 +236,9 @@ void timeout() {
       command = decoded[2];
     }
   }
+  else {
+    debugPrint();
+  }
 
   timeIndex = 0;
 }
@@ -248,34 +251,35 @@ void enableTimer1() {
 }
 
 void disableTimer1() {
-  TIMSK1 &= ~(1 << TOIE1);  // Enable Timer1 overflow interrupt
-  TCCR1B &= ~(1 << CS11);   // Set prescaler to 8 (1 tick = 0.5 µs)
+  TIMSK1 &= ~(1 << TOIE1);  // Disable Timer1 overflow interrupt
+  TCCR1B &= ~(1 << CS11);   // Set prescaler to 0 (No Input)
+  
   TCNT1 = 0;                // Initialize counter to 0
   timer1on = false;
 }
 
 void setup() {
   Serial.begin(115200);
-  delay(500);
-
+  delay(300);
 
   pinMode(PIN_IR_RECEIVER, INPUT_PULLUP);
   pinMode(PIN_IR_LED, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(PIN_IR_LED, LOW);
+  digitalWrite(LED_BUILTIN, LOW);
 
   noInterrupts();
   TCCR1A = 0;  // Set Timer1 to Normal mode
   TCCR1B = 0;  // Set Timer1 to Normal mode
-  // Only enable on pin change
-  // enableTimer1();
+  // enableTimer1(); // Only enable on pin change
   interrupts();
 
   attachInterrupt(digitalPinToInterrupt(PIN_IR_RECEIVER), pinChangeISR, CHANGE);
 
-  // set_sleep_mode(SLEEP_MODE_IDLE);
+  set_sleep_mode(SLEEP_MODE_IDLE);
   // set_sleep_mode(SLEEP_MODE_PWR_SAVE);
   // set_sleep_mode(SLEEP_MODE_STANDBY);
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  //set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 
   // Enable sleep
   sleep_enable();
@@ -289,17 +293,17 @@ void setup() {
 
 void loop() {
   if (timeout_flag) {
+    timeout_flag = false;
     if (timeIndex) {
       timeout();
     }
-    timeout_flag = false;
   }
 
   if (command) {
     int tmpCmd = command;
     command = 0;
 
-    delay(400);  // Let the old command settle
+    delay(400);  // Let the old command settle down
 
     bool done = false;
 
@@ -329,11 +333,13 @@ void loop() {
         sendOffThreeTimes();
         done = true;
         break;
+      default:
+        break;
     }
 
     if (done) {
       digitalWrite(LED_BUILTIN, HIGH);
-      delay(500);
+      delay(200);
       digitalWrite(LED_BUILTIN, LOW);
     }
   }
