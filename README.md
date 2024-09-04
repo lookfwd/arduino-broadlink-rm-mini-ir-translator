@@ -54,6 +54,6 @@ System Power Consumption - With Power Down Mode:
 
 At the end I also removed the Arduino Pro Mini power led - in the spirit of lowering power. 
 
-![](resources/remove-power-led.png)
+![](resources/remove-power-led.jpg)
 
 I also had to make a quick fix to the tone Arduino library with this PR [Quick Fix of overflow for larger toggle_count values by lookfwd · Pull Request #565](https://github.com/arduino/ArduinoCore-avr/pull/565). I didn't expect that I would hit an Arduino core bug that quickly, but here we are.
