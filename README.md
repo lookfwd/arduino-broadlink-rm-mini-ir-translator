@@ -5,7 +5,9 @@ An Arduino project that provides full control over the Broadlink WiFi RM Mini 3.
 ![](resources/ir-translator-and-broadlink.jpg)
 ## Back Story
 A couple of months ago, I bought [a small disco ball](https://www.amazon.com/gp/product/B0D2SVSR26/) for my child's room.
+
 ![](resources/disco-ball.jpg)
+
 It's decent, and the battery life is satisfactory, but most importantly, my toddler loves it! Since we knew we wanted to keep it, I decided to integrate it with Google Home so I could control it with voice commands, e.g., by saying, "Hey Google, turn off the disco ball in 20 minutes." To achieve this, I purchased one of my favorite devices, the [Broadlink WiFi Smart Home Hub RM Mini 3](https://www.amazon.com/dp/B07K2DHXB6). However, after a quick setup, I was disappointed. To turn the disco ball off, you have to press a button three times quickly. This is a bit annoying, and the Hub RM Mini 3 didn’t seem to support it. I confirmed with their support that:
 
 > If your physical remote requires pressing a button three times to send a different IR code, this cannot be supported by the BroadLink RM device. However, you can try creating three separate buttons for your physical remote and learn each press. You can then try controlling it and see if it works. Long press actions are also not supported.
@@ -31,6 +33,7 @@ The components I used are:
 
 ![](resources/ir-translator-front.jpg)
 ![](resources/ir-translator-back.jpg)
+
 ## Development
 I made the Broadlink RM Mini 3 pretend it’s an LG 32LE4500. I chose that protocol because it’s short and very similar, if not identical, to the one the disco ball uses.
 
