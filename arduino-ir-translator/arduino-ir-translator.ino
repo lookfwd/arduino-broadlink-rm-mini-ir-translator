@@ -4,6 +4,11 @@
 
 #define BUFFER_LIMIT 200
 
+// Solution to (2^16 - TIMEOUT_OFFSET) * 0.5uS = 12ms
+// We want timeout at 12ms from the last pulse because
+// that's when we know for sure it's the end of a packet
+#define TIMEOUT_OFFSET 41536
+
 struct Frame {
   unsigned long times[BUFFER_LIMIT];
   int len;
@@ -239,7 +244,7 @@ void decodeLGAndPrint(const Frame& frame) {
 }
 
 void enableTimer1() {
-  TCNT1 = 0;               // Initialize counter to 0
+  TCNT1 = TIMEOUT_OFFSET;  // Initialize counter to 0
   TCCR1B |= (1 << CS11);   // Set prescaler to 8 (1 tick = 0.5 µs)
   TIMSK1 |= (1 << TOIE1);  // Enable Timer1 overflow interrupt
   timer1on = true;
@@ -249,7 +254,7 @@ void disableTimer1() {
   TIMSK1 &= ~(1 << TOIE1);  // Disable Timer1 overflow interrupt
   TCCR1B &= ~(1 << CS11);   // Set prescaler to 0 (No Input)
 
-  TCNT1 = 0;  // Initialize counter to 0
+  TCNT1 = TIMEOUT_OFFSET;  // Initialize counter to 0
   timer1on = false;
 }
 
@@ -307,7 +312,11 @@ void processRead(const Frame& frame) {
     return;
   }
 
-  delay(400);  // Let the old command settle down
+  // Let the old command settle down. That's
+  // 500 ms to settle on top of 200ms so that
+  // we get rid of up to two repeats and their
+  // timeouts
+  delay(700);
 
   switch (command) {
     case 136:  // Key 1
@@ -375,7 +384,7 @@ ISR(TIMER1_OVF_vect) {
   }  // implicitly else - discard this write buffer
   write->reset();
 
-  TCNT1 = 0;
+  TCNT1 = TIMEOUT_OFFSET;
   disableTimer1();
 }
 
@@ -385,7 +394,7 @@ void pinChangeISR() {
     enableTimer1();
   }
   if (write->len < BUFFER_LIMIT) {
-    write->times[write->len++] = TCNT1;
+    write->times[write->len++] = TCNT1 - TIMEOUT_OFFSET;
   }
-  TCNT1 = 0;
+  TCNT1 = TIMEOUT_OFFSET;
 }
